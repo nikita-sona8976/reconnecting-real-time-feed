@@ -1,0 +1,26 @@
+{
+  "name": "reconnecting-real-time-incident-feed",
+  "version": "1.0.0",
+  "description": "A two-way incident coordination feed for multiple simultaneous clients, with automatic reconnection, server-assigned ordering, missed-update recovery, and client-side deduplication.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/feed.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.18.0"
+  },
+  "keywords": [
+    "websocket",
+    "realtime",
+    "reconnection",
+    "deduplication",
+    "incident-feed",
+    "express",
+    "ws"
+  ],
+  "author": "",
+  "license": "MIT"
+}

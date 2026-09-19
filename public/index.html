@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reconnecting Real-Time Incident Feed</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-branding">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h1>Incident Matrix</h1>
+          <p class="subtitle">Durable Real-Time Incident Coordination Feed</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="room-selector">
+          <label for="roomSelect">Room:</label>
+          <select id="roomSelect" class="input-select">
+            <option value="incident-room-1">incident-room-1</option>
+            <option value="prod-outages">prod-outages</option>
+            <option value="infra-alerts">infra-alerts</option>
+          </select>
+        </div>
+        
+        <div id="connectionStatus" class="status-badge state-disconnected">
+          <span class="status-dot"></span>
+          <span class="status-text">DISCONNECTED</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <main class="dashboard-grid">
+      <!-- Left Sidebar: Controls & Metrics -->
+      <aside class="sidebar-panel">
+        
+        <!-- Network Simulation Box -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Network Chaos Simulation</h3>
+            <span class="info-tooltip" title="Test server disconnects & automatic sequence replay">ⓘ</span>
+          </div>
+          <div class="card-body controls-group">
+            <button id="btnSeverSocket" class="btn btn-danger">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+              Sever Socket
+            </button>
+            <button id="btnRecoverSocket" class="btn btn-success">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+              Recover Connection
+            </button>
+          </div>
+          <div id="reconnectNotice" class="reconnect-banner hidden">
+            <span id="reconnectTimerText">Reconnecting in 2s (Attempt 1)...</span>
+          </div>
+        </div>
+
+        <!-- Telemetry Metrics Grid -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Protocol Metrics</h3>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <span class="metric-label">Last Seen Seq</span>
+              <span id="metricLastSeq" class="metric-value code-font">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Total Received</span>
+              <span id="metricTotalReceived" class="metric-value code-font">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Dupes Dropped</span>
+              <span id="metricDupes" class="metric-value code-font text-warning">0</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-label">Reconnects</span>
+              <span id="metricReconnects" class="metric-value code-font">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dispatch Incident Form -->
+        <div class="card glass-card">
+          <div class="card-header">
+            <h3>Dispatch Incident</h3>
+          </div>
+          <form id="incidentForm" class="card-body">
+            <div class="form-group">
+              <label>Severity Level</label>
+              <div class="severity-picker" id="severityPicker">
+                <button type="button" class="sev-btn sev-low" data-sev="low">Low</button>
+                <button type="button" class="sev-btn sev-medium active" data-sev="medium">Med</button>
+                <button type="button" class="sev-btn sev-high" data-sev="high">High</button>
+                <button type="button" class="sev-btn sev-critical" data-sev="critical">Crit</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="incidentMessage">Incident Summary</label>
+              <textarea id="incidentMessage" class="input-textarea" rows="3" placeholder="Describe the incident..." required></textarea>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="form-group">
+              <label class="label-sm">Quick Presets</label>
+              <div class="preset-pills">
+                <button type="button" class="preset-pill" data-sev="high" data-msg="Database CPU utilization exceeded 95% threshold">🔥 DB CPU > 95%</button>
+                <button type="button" class="preset-pill" data-sev="critical" data-msg="Payment API returning 504 Gateway Timeout">⚡ Payment Timeout</button>
+                <button type="button" class="preset-pill" data-sev="medium" data-msg="Cache memory eviction rate elevated in us-east-1">⚠️ Cache Eviction</button>
+                <button type="button" class="preset-pill" data-sev="low" data-msg="Scheduled background job completed with non-fatal warnings">ℹ️ Job Warning</button>
+              </div>
+            </div>
+
+            <button type="submit" id="btnPublish" class="btn btn-primary btn-full">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              Broadcast Incident
+            </button>
+          </form>
+        </div>
+      </aside>
+
+      <!-- Main Content: Incident Stream -->
+      <section class="feed-panel">
+        <div class="feed-header card glass-card">
+          <div class="feed-title">
+            <h2>Live Incident Feed</h2>
+            <span id="roomBadge" class="badge-room">room: incident-room-1</span>
+          </div>
+          <div class="feed-actions">
+            <button id="btnClearFeed" class="btn btn-ghost btn-sm">Clear Display</button>
+          </div>
+        </div>
+
+        <div id="incidentFeed" class="incident-feed-container">
+          <!-- Empty State -->
+          <div id="emptyFeedState" class="empty-state">
+            <div class="empty-icon">📡</div>
+            <h3>Feed Ready & Subscribed</h3>
+            <p>Waiting for real-time incidents or connection replay...</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="dedupe.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
