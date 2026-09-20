@@ -19,7 +19,7 @@
 ### Setup and Execution Commands
 ```bash
 # Clone the repository
-git clone [https://github.com/nikita-sona8976/product-engineer-ps.git](https://github.com/nikita-sona8976/product-engineer-ps.git)
+git clone [https://github.com/nikita-sona8976/reconnecting-real-time-feed.git](https://github.com/nikita-sona8976/reconnecting-real-time-feed.git)
 cd product-engineer-ps
 
 # Install dependencies
