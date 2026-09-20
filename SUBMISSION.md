@@ -19,8 +19,8 @@
 ### Setup and Execution Commands
 ```bash
 # Clone the repository
-git clone [https://github.com/nikita-sona8976/reconnecting-real-time-feed.git](https://github.com/nikita-sona8976/reconnecting-real-time-feed.git)
-cd product-engineer-ps
+git clone https://github.com/nikita-sona8976/reconnecting-real-time-feed.git
+cd reconnecting-real-time-feed
 
 # Install dependencies
 npm install
